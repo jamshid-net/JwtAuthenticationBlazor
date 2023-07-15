@@ -28,6 +28,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             claimIdentity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
             _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+
+
         }
         var user = new ClaimsPrincipal(claimIdentity);
         var state = new AuthenticationState(user);

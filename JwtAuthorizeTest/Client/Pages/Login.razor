@@ -1,13 +1,24 @@
 ﻿@page "/login"
 @using Blazored.LocalStorage;
 @using JwtAuthorizeTest.Shared.DTOs;
+@using JwtAuthorizeTest.Shared;
 @using Microsoft.AspNetCore.Components.Authorization;
+@using System.Net.Http.Headers;
 @inject HttpClient HttpClient;
 @inject AuthenticationStateProvider AuthStateProvider;
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage;
 
 <h3>Login</h3>
+
+@if (Flag)
+{
+    <div class="alert alert-success" role="alert">
+        Successfully logined!
+    </div>
+    
+    
+}
 <div class="container">
     <div class="row">
         <EditForm Model="LoginModel" OnValidSubmit="LoginAsync">
@@ -39,6 +50,7 @@
 
     public LoginDto LoginModel { get; set; } = new();
     private string? errorMessage = null;
+    private bool Flag { get; set; } = false;
 
     public async Task LoginAsync()
     {
@@ -47,9 +59,12 @@
             var response = await HttpClient.PostAsJsonAsync<LoginDto>("api/Account/login", LoginModel);
             if (response.IsSuccessStatusCode)
             {
-                var token = await response.Content.ReadAsStringAsync();
-                await LocalStorage.SetItemAsStringAsync("token", token);
+                var token = await response.Content.ReadFromJsonAsync<JwtModel>();
+                await LocalStorage.SetItemAsStringAsync("token", token.result);
                 await AuthStateProvider.GetAuthenticationStateAsync();
+                Flag = true;
+
+
 
 
             }
@@ -62,4 +77,5 @@
         }
     }
 
+   
 }

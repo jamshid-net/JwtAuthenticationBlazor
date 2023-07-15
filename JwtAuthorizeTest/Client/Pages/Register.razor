@@ -1,13 +1,22 @@
 ﻿@page "/register"
 @using Blazored.LocalStorage;
 @using JwtAuthorizeTest.Shared.DTOs;
+@using JwtAuthorizeTest.Shared;
 @using Microsoft.AspNetCore.Components.Authorization;
+@using System.Net.Http.Headers;
 @inject HttpClient HttpClient;
 @inject ILocalStorageService LocalStorage;
 @inject AuthenticationStateProvider AuthStateProvider;
 
 <h3>Register</h3>
+@if (Flag)
+{
+    <div class="alert alert-success" role="alert">
+        Successfully registered!
+    </div>
 
+
+}
 <div class="container">
     <EditForm Model="RegisterModel" OnValidSubmit="RegisterAsync">
         <div class="card-body">
@@ -40,7 +49,7 @@
 @code{
 
     public RegisterDto RegisterModel { get; set; } = new();
-
+    private bool Flag { get; set; } = false;
     public string errorMessage = null;
 
     public async Task RegisterAsync()
@@ -50,9 +59,10 @@
             var response = await HttpClient.PostAsJsonAsync<RegisterDto>("api/Account/register", RegisterModel);
             if (response.IsSuccessStatusCode)
             {
-                var token = await response.Content.ReadAsStringAsync();
-                await LocalStorage.SetItemAsStringAsync("token", token);
+                var token = await response.Content.ReadFromJsonAsync<JwtModel>();
+                await LocalStorage.SetItemAsStringAsync("token", token.result);
                 await AuthStateProvider.GetAuthenticationStateAsync();
+                Flag = true;
 
             }
 
