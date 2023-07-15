@@ -1,0 +1,27 @@
+﻿@using Blazored.LocalStorage;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject ILocalStorageService LocalStorage;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inherits LayoutComponentBase
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <button @onclick="LogoutAsync" class="btn btn-dark">Logout</button>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+@code{
+    public async Task LogoutAsync()
+    {
+        await LocalStorage.RemoveItemAsync("token");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+}

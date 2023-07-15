@@ -1,0 +1,65 @@
+﻿@page "/login"
+@using Blazored.LocalStorage;
+@using JwtAuthorizeTest.Shared.DTOs;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject HttpClient HttpClient;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage;
+
+<h3>Login</h3>
+<div class="container">
+    <div class="row">
+        <EditForm Model="LoginModel" OnValidSubmit="LoginAsync">
+            <div class="card-body">
+                <DataAnnotationsValidator />
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <p class="text-danger">@errorMessage</p>
+                }
+                <div class="form-group mb-2">
+                    <label>User name:</label>
+                    <InputText @bind-Value="LoginModel.UserName" class="form-control" DisplayName="Username" />
+                    <ValidationMessage For="() => LoginModel.UserName" />
+                </div>
+                <div class="form-group mb-2">
+                    <label>Password:</label>
+                    <InputText type="password" @bind-Value="LoginModel.Password" class="form-control" DisplayName="Password" />
+                    <ValidationMessage For="() => LoginModel.Password" />
+                </div>
+                <button type="submit" class="btn btn-success">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+
+
+    public LoginDto LoginModel { get; set; } = new();
+    private string? errorMessage = null;
+
+    public async Task LoginAsync()
+    {
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync<LoginDto>("api/Account/login", LoginModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadAsStringAsync();
+                await LocalStorage.SetItemAsStringAsync("token", token);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            errorMessage = ex.Message;
+        }
+    }
+
+}

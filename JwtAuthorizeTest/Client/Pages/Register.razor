@@ -1,0 +1,68 @@
+﻿@page "/register"
+@using Blazored.LocalStorage;
+@using JwtAuthorizeTest.Shared.DTOs;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject HttpClient HttpClient;
+@inject ILocalStorageService LocalStorage;
+@inject AuthenticationStateProvider AuthStateProvider;
+
+<h3>Register</h3>
+
+<div class="container">
+    <EditForm Model="RegisterModel" OnValidSubmit="RegisterAsync">
+        <div class="card-body">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <p class="text-danger">@errorMessage</p>
+            }
+            <div class="form-group mb-2">
+                <label>User name:</label>
+                <InputText @bind-Value="RegisterModel.UserName" class="form-control" DisplayName="Username" />
+                <ValidationMessage For="() => RegisterModel.UserName" />
+            </div>
+            <div class="form-group mb-2">
+                <label>Password:</label>
+                <InputText type="password" @bind-Value="RegisterModel.Password" class="form-control" DisplayName="Password" />
+                <ValidationMessage For="() => RegisterModel.Password" />
+            </div>
+            <div class="form-group mb-2">
+                <label>Confirm password:</label>
+                <InputText type="password"  @bind-Value="RegisterModel.ConfirmPassword" class="form-control" DisplayName="ConfirmPassword" />
+                <ValidationMessage For="() => RegisterModel.ConfirmPassword" />
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+    </EditForm>
+
+</div>
+@code{
+
+    public RegisterDto RegisterModel { get; set; } = new();
+
+    public string errorMessage = null;
+
+    public async Task RegisterAsync()
+    {
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync<RegisterDto>("api/Account/register", RegisterModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadAsStringAsync();
+                await LocalStorage.SetItemAsStringAsync("token", token);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+
+            errorMessage = ex.Message;
+        }
+    }
+
+}
