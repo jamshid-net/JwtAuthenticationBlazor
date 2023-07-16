@@ -10,7 +10,8 @@ public class ApplicationDbContext:DbContext
     {
         
     }
-    public DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; set; } 
+    public DbSet<UserRefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -59,8 +59,9 @@
             var response = await HttpClient.PostAsJsonAsync<RegisterDto>("api/Account/register", RegisterModel);
             if (response.IsSuccessStatusCode)
             {
-                var token = await response.Content.ReadFromJsonAsync<JwtModel>();
-                await LocalStorage.SetItemAsStringAsync("token", token.result);
+                var tokenresponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                await LocalStorage.SetItemAsStringAsync("token", tokenresponse.AccessToken);
+                await LocalStorage.SetItemAsStringAsync("refreshtoken", tokenresponse.RefreshToken);
                 await AuthStateProvider.GetAuthenticationStateAsync();
                 Flag = true;
 

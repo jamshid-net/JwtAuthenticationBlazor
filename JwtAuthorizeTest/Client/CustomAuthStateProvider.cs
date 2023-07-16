@@ -19,7 +19,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         string token = await _localStorage.GetItemAsStringAsync("token");
-
+        string refreshtoken = await _localStorage.GetItemAsStringAsync("refreshtoken");
         var claimIdentity = new ClaimsIdentity();
         _httpClient.DefaultRequestHeaders.Authorization = null;
 

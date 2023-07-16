@@ -13,12 +13,15 @@ public class AccountController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IHashStringService _hashStringService;
-
-    public AccountController(ApplicationDbContext context, IJwtTokenService jwtTokenService, IHashStringService hashStringService)
+    private readonly IConfiguration _configuration;
+    private readonly IUserRefreshTokenService _userRefreshTokenService;
+    public AccountController(ApplicationDbContext context, IJwtTokenService jwtTokenService, IHashStringService hashStringService, IUserRefreshTokenService userRefreshTokenService, IConfiguration configuration)
     {
         _context = context;
         _jwtTokenService = jwtTokenService;
         _hashStringService = hashStringService;
+        _userRefreshTokenService = userRefreshTokenService;
+        _configuration = configuration;
     }
 
 
@@ -30,8 +33,19 @@ public class AccountController : ControllerBase
             .FirstOrDefaultAsync(x => x.UserName == logindto.UserName && x.Password == hashedPassword);
         if (foundUser is null)
             return BadRequest("User is not found!");
+        var tokenResponse =await _jwtTokenService.CreateTokenAsync(logindto.UserName);
+        var userRefreshtoken = new UserRefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserName = logindto.UserName,
+            ExpiresTime = DateTime.Now.AddMinutes(_configuration.GetValue("JWT:RefreshTokenExpiresTime", 5)),
+            RefreshToken = tokenResponse.RefreshToken,
 
-        return Ok(_jwtTokenService.CreateTokenAsync(logindto.UserName));
+        };
+
+       await _userRefreshTokenService.AddOrUpdateRefreshToken(userRefreshtoken);
+
+        return Ok(tokenResponse);
     }
 
     [HttpPost("register")]
