@@ -8,6 +8,8 @@
 @inject AuthenticationStateProvider AuthStateProvider;
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage;
+@inject IJSRuntime IJSRuntime;
+
 
 <h3>Login</h3>
 
@@ -59,7 +61,9 @@
             var response = await HttpClient.PostAsJsonAsync<LoginDto>("api/Account/login", LoginModel);
             if (response.IsSuccessStatusCode)
             {
+
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                await IJSRuntime.InvokeVoidAsync("window.setToStorage", "Bearer", tokenResponse.AccessToken);
                 await LocalStorage.SetItemAsStringAsync("token", tokenResponse.AccessToken);
                 await LocalStorage.SetItemAsStringAsync("refreshtoken", tokenResponse.RefreshToken);
                 await AuthStateProvider.GetAuthenticationStateAsync();

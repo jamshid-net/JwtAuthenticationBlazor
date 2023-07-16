@@ -66,9 +66,11 @@
                 Flag = true;
 
             }
+            else
+                errorMessage = await response.Content.ReadAsStringAsync();
 
 
-        }
+    }
         catch (Exception ex)
         {
 

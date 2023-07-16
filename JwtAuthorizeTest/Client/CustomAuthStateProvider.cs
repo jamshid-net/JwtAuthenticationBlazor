@@ -26,8 +26,10 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         if (!string.IsNullOrEmpty(token))
         {
             claimIdentity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
-            _httpClient.DefaultRequestHeaders.Authorization =
+          var res=  _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+
+            var b = res;
 
 
         }
