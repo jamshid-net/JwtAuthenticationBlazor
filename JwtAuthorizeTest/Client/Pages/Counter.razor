@@ -1,7 +1,7 @@
 ﻿@page "/counter"
 @using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.Authorization
-@attribute [Authorize]
+@attribute [Authorize(Roles ="Hello")]
 
 <PageTitle>Counter</PageTitle>
 <h1>Counter</h1>

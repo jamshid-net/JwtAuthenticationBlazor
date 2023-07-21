@@ -7,7 +7,7 @@ public interface IUserRefreshTokenService
 {
     Task<UserRefreshToken> AddOrUpdateRefreshToken(UserRefreshToken refreshToken, CancellationToken cancellationToken = default);
     Task<bool> AuthenAsync(LoginDto user);
-    Task<bool> DeleteUserRefreshTokens(string username, string refreshToken, CancellationToken cancellationToken = default);
+    Task<bool> DeleteUserRefreshTokens(string refreshToken, CancellationToken cancellationToken = default);
     Task<UserRefreshToken> GetSavedRefreshTokens(string username, string refreshtoken); 
 
 }

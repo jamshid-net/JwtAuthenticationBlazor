@@ -18,7 +18,13 @@ public class JwtTokenService: IJwtTokenService
              => (_configuration, _hashStringService) = (configuration, hashStringService);
     public async ValueTask<TokenResponse> CreateTokenAsync(string userName)
     {
-        var claims = new List<Claim>() { new Claim(ClaimTypes.Name,userName)};
+        var claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.Name,userName),
+            new Claim(ClaimTypes.Role,"Hello"),
+            new Claim(ClaimTypes.Role,"AAA")
+        
+        };
        
 
         var jwt = new JwtSecurityToken(

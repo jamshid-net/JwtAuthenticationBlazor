@@ -24,6 +24,12 @@
     public async Task LogoutAsync()
     {
         await LocalStorage.RemoveItemAsync("token");
+
+        var refreshtoken = await LocalStorage.GetItemAsStringAsync("refreshtoken");
+        await HttpClient.PostAsJsonAsync<string>("api/Account/logout", refreshtoken);
+
+        await LocalStorage.RemoveItemAsync("refreshtoken");
+
         await AuthStateProvider.GetAuthenticationStateAsync();
     }
     protected async override Task OnInitializedAsync()
