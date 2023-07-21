@@ -47,10 +47,10 @@ public class UserRefreshTokenService : IUserRefreshTokenService
         else return false;
     }
 
-    public async Task<bool> DeleteUserRefreshTokens(string username, string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteUserRefreshTokens(string refreshToken, CancellationToken cancellationToken = default)
     {
         var foundRefreshtoken = await _context.RefreshTokens.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UserName == username && x.RefreshToken == refreshToken);
+            .FirstOrDefaultAsync(x => x.RefreshToken == refreshToken);
         _context.RefreshTokens.Remove(foundRefreshtoken);
 
         return (await _context.SaveChangesAsync(cancellationToken)) > 0;

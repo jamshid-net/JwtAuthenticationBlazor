@@ -50,6 +50,12 @@ public class AccountController : ControllerBase
         return Ok(tokenResponse);
     }
 
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout( string refreshToken)
+    {
+        return Ok(await _userRefreshTokenService.DeleteUserRefreshTokens(refreshToken));
+    }
+
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto register)
     {
