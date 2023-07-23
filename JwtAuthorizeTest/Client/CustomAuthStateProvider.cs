@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
@@ -25,18 +26,35 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         if (!string.IsNullOrEmpty(token))
         {
-            claimIdentity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
+            var claims = ParseClaimsFromJwt(token);
+            
+            claimIdentity = new ClaimsIdentity(claims, "jwt");
           var res=  _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
-
-            var b = res;
 
 
         }
         var user = new ClaimsPrincipal(claimIdentity);
-        var state = new AuthenticationState(user);
+        var userPrincipal = await TransformAsync(user);
+        var state = new AuthenticationState(userPrincipal);
         NotifyAuthenticationStateChanged(Task.FromResult(state));
         return state;
+    }
+    public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+    {
+        var identity = (ClaimsIdentity)principal.Identity;
+        if (identity.IsAuthenticated)
+        {
+            if (identity.HasClaim(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"))
+            {
+                var roles = identity.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").Value.Split(',');
+                foreach (var role in roles)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, role.Trim()));
+                }
+            }
+        }
+        return Task.FromResult(principal);
     }
     public static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {

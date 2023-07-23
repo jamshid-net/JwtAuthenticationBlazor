@@ -1,8 +1,10 @@
+using JwtAuthorizeTest.Client;
 using JwtAuthorizeTest.Server.Data;
 using JwtAuthorizeTest.Server.Interfaces;
 using JwtAuthorizeTest.Server.JWT;
 using JwtAuthorizeTest.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.ResponseCompression;
 
 namespace JwtAuthorizeTest;
@@ -22,6 +24,7 @@ public class Program
         builder.Services.AddScoped<IUserRefreshTokenService,UserRefreshTokenService>();
         builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtSettings(builder.Configuration);
+     
         var app = builder.Build();
 
        

@@ -5,6 +5,7 @@ using JwtAuthorizeTest.Shared.DTOs;
 using JwtAuthorizeTest.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace JwtAuthorizeTest.Server.Controllers;
@@ -96,9 +97,10 @@ public class AccountController : ControllerBase
         {
            var principal = await _jwtTokenService.GetPrincipalFromExpiredToken(tokenResponse.AccessToken);
             var userName = principal.FindFirstValue(ClaimTypes.Name);
-           var savedRefreshToken =await _userRefreshTokenService.GetSavedRefreshTokens(userName, tokenResponse.RefreshToken);
+            
+            var savedRefreshToken = await _userRefreshTokenService.GetSavedRefreshTokens(userName, tokenResponse.RefreshToken);
 
-            if(savedRefreshToken.RefreshToken != tokenResponse.RefreshToken)
+            if(savedRefreshToken.RefreshToken != tokenResponse.RefreshToken || savedRefreshToken ==null)
                  return BadRequest($"Error token not found {tokenResponse.RefreshToken}");
 
             if (savedRefreshToken.ExpiresTime < DateTime.Now)
@@ -110,5 +112,9 @@ public class AccountController : ControllerBase
         }
         else return BadRequest("Model is not valid");
     }
-
+    [HttpGet("getclaims")] 
+    public async Task<IActionResult> GetClaimsFromToken()
+    {
+        return await Task.FromResult(Ok(User));
+    }
 }
