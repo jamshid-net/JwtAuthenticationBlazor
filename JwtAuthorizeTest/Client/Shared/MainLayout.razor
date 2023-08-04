@@ -1,4 +1,5 @@
 ﻿@using Blazored.LocalStorage;
+@using JwtAuthorizeTest.Client.Pages;
 @using JwtAuthorizeTest.Shared;
 @using Microsoft.AspNetCore.Components.Authorization;
 @inject ILocalStorageService LocalStorage;
@@ -13,14 +14,35 @@
     <main>
         <div class="top-row px-4">
             <button @onclick="LogoutAsync" class="btn btn-dark">Logout</button>
+
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
+        <ErrorBoundary @ref="errorBoundary">
+            <ChildContent>
+                <article class="content px-4">
+                    @Body
+                </article>
+            </ChildContent>
+           
+        </ErrorBoundary>
+
+
     </main>
 </div>
-@code{
+@code {
+
+
+    private ErrorBoundary? errorBoundary;
+    
+    protected override void OnInitialized()
+    {
+        TaskScheduler.UnobservedTaskException += async (sender, e) =>
+        {
+             await LogoutAsync();
+            e.SetObserved();
+        };
+    }
+
     public async Task LogoutAsync()
     {
         await LocalStorage.RemoveItemAsync("token");
@@ -31,27 +53,10 @@
         await LocalStorage.RemoveItemAsync("refreshtoken");
 
         await AuthStateProvider.GetAuthenticationStateAsync();
+        await InvokeAsync(StateHasChanged);
     }
-    protected async override Task OnInitializedAsync()
-    {
-       
-        var refreshtoken= await LocalStorage.GetItemAsStringAsync("refreshtoken");
-        var accsesstoken = await LocalStorage.GetItemAsStringAsync("token");
-        var tokenresponse = new TokenResponse
-            {
-                AccessToken = accsesstoken,
-                RefreshToken = refreshtoken
-            };
-        //var response = await HttpClient.PostAsJsonAsync<TokenResponse>("api/Account/refreshtoken", tokenresponse);
-        //if (response.IsSuccessStatusCode)
-        //{
-        //    var tokenResponse =await response.Content.ReadFromJsonAsync<TokenResponse>();
-        //    await LocalStorage.SetItemAsStringAsync("token", tokenResponse.AccessToken);
-        //    await LocalStorage.SetItemAsStringAsync("refreshtoken", tokenResponse.RefreshToken);
-        //    await AuthStateProvider.GetAuthenticationStateAsync();
-        //}
 
-    }
+
 
 
 }

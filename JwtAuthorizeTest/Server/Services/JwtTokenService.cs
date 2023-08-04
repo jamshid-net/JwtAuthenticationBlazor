@@ -19,15 +19,18 @@ public class JwtTokenService: IJwtTokenService
         var claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name,userName),
-            new Claim(ClaimTypes.Role," "),
             new Claim(ClaimTypes.Role,"Admin"),
-            new Claim(ClaimTypes.Role,"Hello"),
-            new Claim(ClaimTypes.Role," "),
-            new Claim("role","admin"),
-            new Claim("role","user")
+            new Claim(ClaimTypes.Role,"SuperAdmin"),
+            new Claim(ClaimTypes.Role,"User"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Create"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Read"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Update"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Delete")
             
-            
+         
         };
+            
+            
        
 
         var jwt = new JwtSecurityToken(

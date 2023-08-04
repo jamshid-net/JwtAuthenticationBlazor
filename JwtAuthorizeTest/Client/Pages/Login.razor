@@ -63,7 +63,7 @@
             {
 
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
-                await IJSRuntime.InvokeVoidAsync("window.setToStorage", "Bearer", tokenResponse.AccessToken);
+               // await IJSRuntime.InvokeVoidAsync("window.setToStorage", "Bearer", tokenResponse.AccessToken);
                 await LocalStorage.SetItemAsStringAsync("token", tokenResponse.AccessToken);
                 await LocalStorage.SetItemAsStringAsync("refreshtoken", tokenResponse.RefreshToken);
                 await AuthStateProvider.GetAuthenticationStateAsync();

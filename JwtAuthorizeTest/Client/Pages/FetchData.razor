@@ -40,6 +40,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public Error? Error { get; set; }
+
     private WeatherForecast[]? forecasts;
 
     protected override async Task OnInitializedAsync()

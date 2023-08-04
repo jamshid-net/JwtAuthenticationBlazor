@@ -1,0 +1,39 @@
+﻿@using Blazored.LocalStorage;
+@using Microsoft.Extensions.Logging
+@inject ILogger<Error> Logger
+@inject ILocalStorageService LocalStorage;
+@inject HttpClient HttpClient;
+@inject AuthenticationStateProvider AuthStateProvider;
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public void ProcessError(Exception ex)
+    {
+        Logger.LogError("Error:ProcessError - Type: {Type} Message: {Message}",
+            ex.GetType(), ex.Message);
+    }
+    public async Task HandleException(Exception exception)
+    {
+        if (exception.Message.Contains("401"))
+        {
+
+            await LocalStorage.RemoveItemAsync("token");
+
+            var refreshtoken = await LocalStorage.GetItemAsStringAsync("refreshtoken");
+            await HttpClient.PostAsJsonAsync<string>("api/Account/logout", refreshtoken);
+
+            await LocalStorage.RemoveItemAsync("refreshtoken");
+
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+    }
+}

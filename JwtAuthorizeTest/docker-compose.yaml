@@ -1,0 +1,42 @@
+version: "3.8"
+
+networks:
+  app_network:
+    driver: bridge
+
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+    ports:
+      - "5674:5432"
+    image: postgres
+    container_name: postgresql
+    networks:
+      - app_network
+ 
+  web:
+    build: .
+    ports:
+      - "5858:80"
+    depends_on:
+      - db
+    container_name: App
+    environment:
+      - ConnectionStrings__DbConnect=Server=postgresql;Port=5432;Database=JwtTokenAuthorizeTest;User Id=postgres;Password=postgres;
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - app_network
+  
+  pg_dashboard:
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@mail.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "5880:80"
+    
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    networks:
+      - app_network

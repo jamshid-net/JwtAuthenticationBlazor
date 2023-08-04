@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -26,8 +27,10 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         if (!string.IsNullOrEmpty(token))
         {
-            var claims = ParseClaimsFromJwt(token);
-            
+           
+            List<Claim> claims = GetClaimsFromJwt(token);
+
+
             claimIdentity = new ClaimsIdentity(claims, "jwt");
           var res=  _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
@@ -56,20 +59,16 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         }
         return Task.FromResult(principal);
     }
-    public static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+
+  
+    
+    public static List<Claim> GetClaimsFromJwt(string jwt)
     {
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-        return keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()));
-    }
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        switch (base64.Length % 4)
-        {
-            case 2: base64 += "=="; break;
-            case 3: base64 += "="; break;
-        }
-        return Convert.FromBase64String(base64);
+        
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(jwt);
+        var tokenS = jsonToken as JwtSecurityToken;
+        var claims = tokenS.Claims.ToList();
+        return claims;
     }
 }
