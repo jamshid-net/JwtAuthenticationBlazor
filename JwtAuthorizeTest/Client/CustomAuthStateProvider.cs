@@ -1,5 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
@@ -25,33 +27,48 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         if (!string.IsNullOrEmpty(token))
         {
-            claimIdentity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
+           
+            List<Claim> claims = GetClaimsFromJwt(token);
+
+
+            claimIdentity = new ClaimsIdentity(claims, "jwt");
           var res=  _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
-
-            var b = res;
 
 
         }
         var user = new ClaimsPrincipal(claimIdentity);
-        var state = new AuthenticationState(user);
+        var userPrincipal = await TransformAsync(user);
+        var state = new AuthenticationState(userPrincipal);
         NotifyAuthenticationStateChanged(Task.FromResult(state));
         return state;
     }
-    public static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+    public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-        return keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()));
-    }
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        switch (base64.Length % 4)
+        var identity = (ClaimsIdentity)principal.Identity;
+        if (identity.IsAuthenticated)
         {
-            case 2: base64 += "=="; break;
-            case 3: base64 += "="; break;
+            if (identity.HasClaim(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"))
+            {
+                var roles = identity.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").Value.Split(',');
+                foreach (var role in roles)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, role.Trim()));
+                }
+            }
         }
-        return Convert.FromBase64String(base64);
+        return Task.FromResult(principal);
+    }
+
+  
+    
+    public static List<Claim> GetClaimsFromJwt(string jwt)
+    {
+        
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(jwt);
+        var tokenS = jsonToken as JwtSecurityToken;
+        var claims = tokenS.Claims.ToList();
+        return claims;
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace JwtAuthorizeTest.Server.Controllers;
 [ApiController]
 [Route("[controller]")]
-[Authorize(Roles = "Get,All")]
+[Authorize(Roles = "Admin")]
 public class WeatherForecastController : ControllerBase
 {
     private static readonly string[] Summaries = new[]

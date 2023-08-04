@@ -1,9 +1,7 @@
 ﻿using JwtAuthorizeTest.Server.Interfaces;
 using JwtAuthorizeTest.Shared;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security;
 using System.Security.Claims;
 using System.Text;
 
@@ -21,10 +19,18 @@ public class JwtTokenService: IJwtTokenService
         var claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name,userName),
-            new Claim(ClaimTypes.Role,"Hello"),
-            new Claim(ClaimTypes.Role,"AAA")
-        
+            new Claim(ClaimTypes.Role,"Admin"),
+            new Claim(ClaimTypes.Role,"SuperAdmin"),
+            new Claim(ClaimTypes.Role,"User"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Create"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Read"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Update"),
+            new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/Permission","Delete")
+            
+         
         };
+            
+            
        
 
         var jwt = new JwtSecurityToken(
@@ -66,6 +72,7 @@ public class JwtTokenService: IJwtTokenService
         };
         var tokenHandler = new JwtSecurityTokenHandler(); 
         var principal = tokenHandler.ValidateToken(token,tokenValidationParameters,out SecurityToken securityToken);
+      
         JwtSecurityToken jwtSecurityToken = securityToken as JwtSecurityToken;
         if(jwtSecurityToken  == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,StringComparison.InvariantCultureIgnoreCase))
         {

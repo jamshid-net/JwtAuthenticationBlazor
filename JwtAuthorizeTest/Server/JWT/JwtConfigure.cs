@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace JwtAuthorizeTest.Server.JWT;
 
 public static class JwtConfigure
 {
-    public static AuthenticationBuilder AddJwtSettings(this AuthenticationBuilder builder,IConfiguration configuration)
+    public static AuthenticationBuilder AddJwtSettings(this AuthenticationBuilder builder, IConfiguration configuration)
     {
         builder.AddJwtBearer(cfg =>
         {
@@ -29,7 +30,7 @@ public static class JwtConfigure
             {
                 OnAuthenticationFailed = context =>
                 {
-                    if(context.Exception.GetType() == typeof(SecurityException))
+                    if (context.Exception.GetType() == typeof(SecurityException))
                     {
                         context.Response.Headers.Add("IS-TOKEN-EXPIRED", "true");
                     }
@@ -38,7 +39,7 @@ public static class JwtConfigure
             };
 
         });
-
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
         return builder;
     }
 }

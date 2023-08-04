@@ -9,7 +9,11 @@ public static class DataConfiguration
         services.AddDbContext<ApplicationDbContext>(cfg =>
         {
             cfg.UseNpgsql(configuration.GetConnectionString("DbConnect"));
+              
+
         });
+
+       
         return services;
     }
 }

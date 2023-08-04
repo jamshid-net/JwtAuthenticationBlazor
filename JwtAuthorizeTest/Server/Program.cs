@@ -1,14 +1,17 @@
+using JwtAuthorizeTest.Client;
 using JwtAuthorizeTest.Server.Data;
 using JwtAuthorizeTest.Server.Interfaces;
 using JwtAuthorizeTest.Server.JWT;
+using JwtAuthorizeTest.Server.Middlewares;
 using JwtAuthorizeTest.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.ResponseCompression;
 
 namespace JwtAuthorizeTest;
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +25,11 @@ public class Program
         builder.Services.AddScoped<IUserRefreshTokenService,UserRefreshTokenService>();
         builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtSettings(builder.Configuration);
-        var app = builder.Build();
+      
+       
 
+        var app = builder.Build();
+        Console.WriteLine(Ulid.NewUlid());
        
         if (app.Environment.IsDevelopment())
         {
@@ -39,16 +45,18 @@ public class Program
 
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
-       
-
+        
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
 
+          
+
+
         app.MapRazorPages();
         app.MapControllers();
         app.MapFallbackToFile("index.html");
-
+        
         app.Run();
     }
 }
