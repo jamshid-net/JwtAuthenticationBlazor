@@ -25,12 +25,20 @@ public class Program
         builder.Services.AddScoped<IUserRefreshTokenService,UserRefreshTokenService>();
         builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtSettings(builder.Configuration);
-      
-       
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.WithOrigins("http://127.0.0.1:5500")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
+            });
+        });
 
         var app = builder.Build();
         Console.WriteLine(Ulid.NewUlid());
-       
+        app.UseCors();
         if (app.Environment.IsDevelopment())
         {
             app.UseWebAssemblyDebugging();
